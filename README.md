@@ -6,8 +6,6 @@
 
 Sistema completo de visualização de clubes de futebol brasileiros com três modos de exibição: grid alfabético, timeline histórica e agrupamento por estado.
 
-![Preview](https://via.placeholder.com/800x400/198754/ffffff?text=Futebol+Clubes+Preview)
-
 ## ✨ Funcionalidades
 
 - **🔤 Grid Alfabético**: Cards responsivos com busca e ordenação A-Z
