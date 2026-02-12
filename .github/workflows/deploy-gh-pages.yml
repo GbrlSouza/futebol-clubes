@@ -3,8 +3,6 @@ name: 🚀 Deploy GitHub Pages
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch: 
 
 permissions:
@@ -14,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -23,6 +21,8 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -59,18 +59,17 @@ jobs:
           console.log(`🏆 Mais antigo: ${maisAntigo.full_name} (${maisAntigo.founded})`);
           EOF
 
-      # REMOVIDO: Configure Pages (causando erro)
-      # - name: ⚡ Setup Pages
-      #   uses: actions/configure-pages@v4
-
       - name: 📦 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './frontend'
+          name: github-pages
 
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
 
       - name: ✅ Success
         run: |
