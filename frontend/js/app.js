@@ -2,8 +2,6 @@ class FutebolApp {
     constructor() {
         this.isLocal = window.location.hostname === 'localhost' || 
                        window.location.hostname === '127.0.0.1';
-        
-        this.API_URL = this.isLocal ? 'http://localhost:3000/api' : null;
         this.JSON_URL = 'data/clubes.json';
         this.currentView = 'alfabetico';
         this.data = {};
@@ -21,28 +19,41 @@ class FutebolApp {
             this.hideLoading();
         } catch (error) {
             this.showError('Erro ao inicializar aplicação: ' + error.message);
+            console.error('Stack:', error);
         }
     }
 
     async loadData() {
         try {
-            if (this.isLocal) {
-                try {
-                    const response = await fetch(`${this.API_URL}/clubes`);
-                    const result = await response.json();
-                    this.clubes = result.data;
-                } catch (e) {
-                    const response = await fetch(this.JSON_URL);
-                    this.clubes = await response.json();
-                }
-            } else {
-                const response = await fetch(this.JSON_URL);
-                if (!response.ok) throw new Error('JSON não encontrado');
-                this.clubes = await response.json();
-            }
+            const response = await fetch(this.JSON_URL);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            this.clubes = await response.json();
+            this.clubes = this.clubes.map(clube => this.sanitizeClube(clube));
+            
+            console.log(`✅ ${this.clubes.length} clubes carregados`);
         } catch (error) {
-            throw new Error('Não foi possível carregar os dados. Verifique se o arquivo clubes.json existe.');
+            throw new Error('Não foi possível carregar os dados: ' + error.message);
         }
+    }
+
+    sanitizeClube(clube) {
+        return {
+            short_name: clube.short_name || 'N/A',
+            full_name: clube.full_name || clube.short_name || 'Nome não informado',
+            city: clube.city || 'Cidade não informada',
+            state: clube.state || 'UF',
+            founded: clube.founded || 1900,
+            status: clube.status || 'active',
+            slug: clube.slug || clube.short_name?.toLowerCase() || 'clube',
+            site: clube.site || '#',
+            uniforme: clube.uniforme || clube.slug || 'default',
+            anthem: {
+                title: clube.anthem?.title || 'Hino não informado',
+                lyrics_url: clube.anthem?.lyrics_url || null,
+                audio_url: clube.anthem?.audio_url || null
+            }
+        };
     }
 
     getAlfabetico() {
@@ -82,6 +93,65 @@ class FutebolApp {
             `${clubes.length} clube${clubes.length !== 1 ? 's' : ''}`;
     }
 
+    createCard(clube) {
+        const anoAtual = new Date().getFullYear();
+        const idade = anoAtual - clube.founded;
+        const hasLyrics = clube.anthem.lyrics_url && clube.anthem.lyrics_url !== '#';
+        const hasSite = clube.site && clube.site !== '#';
+        
+        return `
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                <div class="card clube-card h-100">
+                    <div class="card-img-top position-relative">
+                        ${clube.short_name}
+                        <span class="badge bg-light text-dark badge-estado">
+                            <i class="bi bi-geo-alt-fill me-1"></i>${clube.state}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-1">${clube.full_name}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-geo-fill me-1"></i>${clube.city}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge badge-fundacao">
+                                <i class="bi bi-calendar-event me-1"></i>${clube.founded}
+                            </span>
+                            <small class="text-muted">${idade} anos</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            ${hasSite ? `
+                                <a href="https://${clube.site}" target="_blank" 
+                                   class="btn btn-success btn-sm flex-fill">
+                                    <i class="bi bi-globe me-1"></i>Site
+                                </a>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm flex-fill" disabled>
+                                    <i class="bi bi-globe me-1"></i>Site
+                                </button>
+                            `}
+                            ${hasLyrics ? `
+                                <a href="${clube.anthem.lyrics_url}" target="_blank" 
+                                   class="btn btn-outline-secondary btn-sm" title="Hino">
+                                    <i class="bi bi-music-note-beamed"></i>
+                                </a>
+                            ` : `
+                                <button class="btn btn-outline-secondary btn-sm" disabled title="Hino não disponível">
+                                    <i class="bi bi-music-note-beamed"></i>
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pt-0">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check me-1"></i>${clube.status === 'active' ? 'Ativo' : 'Inativo'}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     renderTimeline(ordem = 'asc') {
         const clubes = this.getTimeline(ordem);
         const container = document.getElementById('timeline-content');
@@ -90,6 +160,7 @@ class FutebolApp {
         container.innerHTML = clubes.map((clube, index) => {
             const idade = anoAtual - clube.founded;
             const isMaisAntigo = ordem === 'asc' && index === 0;
+            const hasSite = clube.site && clube.site !== '#';
             
             return `
                 <div class="timeline-item ${isMaisAntigo ? 'mais-antigo' : ''}">
@@ -106,10 +177,12 @@ class FutebolApp {
                             <span class="badge bg-light text-dark border">
                                 <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
                             </span>
-                            <a href="https://${clube.site}" target="_blank" 
-                               class="btn-wikipedia ms-auto">
-                                <i class="bi bi-box-arrow-up-right me-1"></i>Site
-                            </a>
+                            ${hasSite ? `
+                                <a href="https://${clube.site}" target="_blank" 
+                                   class="btn-wikipedia ms-auto">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Site
+                                </a>
+                            ` : '<span class="text-muted ms-auto small">Site indisponível</span>'}
                         </div>
                     </div>
                 </div>
@@ -169,52 +242,9 @@ class FutebolApp {
         document.getElementById('total-clubes').textContent = this.clubes.length;
     }
 
-    createCard(clube) {
-        const anoAtual = new Date().getFullYear();
-        const idade = anoAtual - clube.founded;
-        
-        return `
-            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
-                <div class="card clube-card h-100">
-                    <div class="card-img-top position-relative">
-                        ${clube.short_name}
-                        <span class="badge bg-light text-dark badge-estado">
-                            <i class="bi bi-geo-alt-fill me-1"></i>${clube.state}
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold mb-1">${clube.full_name}</h5>
-                        <p class="text-muted mb-2">
-                            <i class="bi bi-geo-fill me-1"></i>${clube.city}
-                        </p>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge badge-fundacao">
-                                <i class="bi bi-calendar-event me-1"></i>${clube.founded}
-                            </span>
-                            <small class="text-muted">${idade} anos</small>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="https://${clube.site}" target="_blank" 
-                               class="btn btn-success btn-sm flex-fill">
-                                <i class="bi bi-globe me-1"></i>Site
-                            </a>
-                            <a href="${clube.anthem.lyrics_url}" target="_blank" 
-                               class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-music-note-beamed"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pt-0">
-                        <small class="text-muted">
-                            <i class="bi bi-shield-check me-1"></i>${clube.status === 'active' ? 'Ativo' : 'Inativo'}
-                        </small>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
     createMiniCard(clube) {
+        const hasSite = clube.site && clube.site !== '#';
+        
         return `
             <div class="clube-mini-card">
                 <div class="clube-avatar">${clube.short_name[0]}</div>
@@ -225,10 +255,12 @@ class FutebolApp {
                         <i class="bi bi-calendar me-1"></i>${clube.founded}
                     </small>
                 </div>
-                <a href="https://${clube.site}" target="_blank" 
-                   class="btn btn-sm btn-outline-success">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                </a>
+                ${hasSite ? `
+                    <a href="https://${clube.site}" target="_blank" 
+                       class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                ` : '<span class="text-muted small">-</span>'}
             </div>
         `;
     }
@@ -253,6 +285,7 @@ class FutebolApp {
         document.getElementById('loading').classList.add('d-none');
         document.getElementById('error').classList.remove('d-none');
         document.getElementById('error-message').textContent = message;
+        console.error(message);
     }
 
     loadTimeline(ordem) {
