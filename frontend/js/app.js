@@ -3,6 +3,7 @@ class FutebolApp {
         this.isLocal = window.location.hostname === 'localhost' || 
                        window.location.hostname === '127.0.0.1';
         this.JSON_URL = 'data/clubes.json';
+        this.IMAGES_PATH = 'images/escudos/';
         this.currentView = 'alfabetico';
         this.data = {};
         this.clubes = [];
@@ -46,6 +47,7 @@ class FutebolApp {
             founded: clube.founded || 1900,
             status: clube.status || 'active',
             slug: clube.slug || clube.short_name?.toLowerCase() || 'clube',
+            typeSlug: clube.typeSlug || '.png',
             site: clube.site || '#',
             uniforme: clube.uniforme || clube.slug || 'default',
             anthem: {
@@ -85,6 +87,66 @@ class FutebolApp {
         return resultado;
     }
 
+    getEscudoUrl(clube) {
+        if (!clube.slug || !clube.typeSlug) {
+            return null;
+        }
+        return `${this.IMAGES_PATH}${clube.slug}${clube.typeSlug}`;
+    }
+
+    renderEscudo(clube, size = 'normal') {
+        const url = this.getEscudoUrl(clube);
+        const alt = `Escudo ${clube.full_name}`;
+        
+        const sizes = {
+            small: { width: 50, height: 50, class: 'escudo-small' },
+            normal: { width: 100, height: 100, class: 'escudo-normal' },
+            large: { width: 140, height: 140, class: 'escudo-large' }
+        };
+        
+        const sizeConfig = sizes[size] || sizes.normal;
+        
+        if (url) {
+            return `
+                <div class="escudo-container ${sizeConfig.class}">
+                    <img src="${url}" 
+                         alt="${alt}" 
+                         loading="lazy"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='${this.renderPlaceholder(clube, size).replace(/'/g, "&apos;")}';">
+                </div>
+            `;
+        }
+        
+        return this.renderPlaceholder(clube, size);
+    }
+
+    renderPlaceholder(clube, size = 'normal') {
+        const initials = clube.short_name.substring(0, 2).toUpperCase();
+        const colors = this.generateColors(clube.short_name);
+        
+        return `
+            <div class="escudo-placeholder ${size}" 
+                 style="background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);">
+                <span>${initials}</span>
+            </div>
+        `;
+    }
+
+    generateColors(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        const hue1 = Math.abs(hash % 360);
+        const hue2 = (hue1 + 30) % 360;
+        
+        return {
+            primary: `hsl(${hue1}, 70%, 40%)`,
+            secondary: `hsl(${hue2}, 70%, 30%)`
+        };
+    }
+
     renderAlfabetico() {
         const clubes = this.getAlfabetico();
         const container = document.getElementById('grid-alfabetico');
@@ -102,8 +164,8 @@ class FutebolApp {
         return `
             <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                 <div class="card clube-card h-100">
-                    <div class="card-img-top position-relative">
-                        ${clube.short_name}
+                    <div class="card-img-top escudo-header">
+                        ${this.renderEscudo(clube, 'normal')}
                         <span class="badge bg-light text-dark badge-estado">
                             <i class="bi bi-geo-alt-fill me-1"></i>${clube.state}
                         </span>
@@ -165,24 +227,29 @@ class FutebolApp {
             return `
                 <div class="timeline-item ${isMaisAntigo ? 'mais-antigo' : ''}">
                     <div class="timeline-content">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="timeline-year">${clube.founded}</div>
-                            <span class="badge bg-success">${idade} anos</span>
-                        </div>
-                        <h5 class="fw-bold mb-1">${clube.full_name}</h5>
-                        <p class="text-muted mb-2">
-                            <i class="bi bi-geo-alt me-1"></i>${clube.city}, ${clube.state}
-                        </p>
-                        <div class="d-flex gap-2 mt-3">
-                            <span class="badge bg-light text-dark border">
-                                <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
-                            </span>
-                            ${hasSite ? `
-                                <a href="https://${clube.site}" target="_blank" 
-                                   class="btn-wikipedia ms-auto">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i>Site
-                                </a>
-                            ` : '<span class="text-muted ms-auto small">Site indisponível</span>'}
+                        <div class="d-flex align-items-start gap-3">
+                            ${this.renderEscudo(clube, 'small')}
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="timeline-year">${clube.founded}</div>
+                                    <span class="badge bg-success">${idade} anos</span>
+                                </div>
+                                <h5 class="fw-bold mb-1">${clube.full_name}</h5>
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-geo-alt me-1"></i>${clube.city}, ${clube.state}
+                                </p>
+                                <div class="d-flex gap-2 mt-3">
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
+                                    </span>
+                                    ${hasSite ? `
+                                        <a href="https://${clube.site}" target="_blank" 
+                                           class="btn-wikipedia ms-auto">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i>Site
+                                        </a>
+                                    ` : '<span class="text-muted ms-auto small">Site indisponível</span>'}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -247,7 +314,7 @@ class FutebolApp {
         
         return `
             <div class="clube-mini-card">
-                <div class="clube-avatar">${clube.short_name[0]}</div>
+                ${this.renderEscudo(clube, 'small')}
                 <div class="flex-grow-1">
                     <h6 class="mb-1 fw-bold">${clube.full_name}</h6>
                     <small class="text-muted d-block">
