@@ -97,6 +97,7 @@ class FutebolApp {
     renderEscudo(clube, size = 'normal') {
         const url = this.getEscudoUrl(clube);
         const alt = `Escudo ${clube.full_name}`;
+        const safeId = `escudo-${clube.slug}-${Math.random().toString(36).substr(2, 9)}`;
         
         const sizes = {
             small: { width: 50, height: 50, class: 'escudo-small' },
@@ -106,18 +107,18 @@ class FutebolApp {
         
         const sizeConfig = sizes[size] || sizes.normal;
         
-        if (url) {
-            return `
-                <div class="escudo-container ${sizeConfig.class}">
-                    <img src="${url}" 
-                         alt="${alt}" 
-                         loading="lazy"
-                         onerror="this.onerror=null; this.parentElement.innerHTML='${this.renderPlaceholder(clube, size).replace(/'/g, "&apos;")}';">
-                </div>
-            `;
+        if (!url) {
+            return this.renderPlaceholder(clube, size);
         }
         
-        return this.renderPlaceholder(clube, size);
+        return `
+            <div class="escudo-container ${sizeConfig.class}" id="${safeId}" data-clube="${clube.short_name}" data-size="${size}">
+                <img src="${url}" 
+                     alt="${alt}" 
+                     loading="lazy"
+                     onerror="document.getElementById('${safeId}').innerHTML='${this.renderPlaceholder(clube, size).replace(/'/g, '"')}'">
+            </div>
+        `;
     }
 
     renderPlaceholder(clube, size = 'normal') {
@@ -150,6 +151,7 @@ class FutebolApp {
     renderAlfabetico() {
         const clubes = this.getAlfabetico();
         const container = document.getElementById('grid-alfabetico');
+        
         container.innerHTML = clubes.map(clube => this.createCard(clube)).join('');
         document.getElementById('count-alfabetico').textContent = 
             `${clubes.length} clube${clubes.length !== 1 ? 's' : ''}`;
