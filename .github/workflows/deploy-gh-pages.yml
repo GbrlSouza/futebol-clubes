@@ -2,8 +2,8 @@ name: 🚀 Deploy GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
-  workflow_dispatch: 
+    branches: [main, master]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,61 +17,38 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
-      - name: 📋 Verificar estrutura
+      - name: 🔄 Sincronizar Dados
+        run: node scripts/sync-data.js
+
+      - name: 🔍 Validar Estrutura
         run: |
-          echo "Verificando arquivos..."
-          ls -la frontend/
           test -f frontend/index.html || (echo "❌ index.html não encontrado" && exit 1)
-          test -f backend/data/clubes.json || (echo "❌ clubes.json não encontrado" && exit 1)
-          echo "✅ Estrutura OK"
+          test -f frontend/data/clubes.json || (echo "❌ clubes.json não encontrado" && exit 1)
+          echo "✅ Estrutura validada"
 
-      - name: 🔄 Sincronizar JSON
-        run: |
-          mkdir -p frontend/data
-          cp backend/data/clubes.json frontend/data/clubes.json
-          echo "✅ JSON sincronizado"
-
-      - name: 🔍 Validar JSON
-        run: |
-          node -e "JSON.parse(require('fs').readFileSync('frontend/data/clubes.json'))"
-          echo "✅ JSON válido"
-
-      - name: 📊 Gerar estatísticas
-        run: |
-          node << 'EOF'
-          const data = require('./frontend/data/clubes.json');
-          console.log(`📊 Total de clubes: ${data.length}`);
-          const estados = [...new Set(data.map(c => c.state))].sort();
-          console.log(`🗺️  Estados: ${estados.join(', ')}`);
-          const maisAntigo = data.reduce((a, b) => a.founded < b.founded ? a : b);
-          console.log(`🏆 Mais antigo: ${maisAntigo.full_name} (${maisAntigo.founded})`);
-          EOF
-
-      - name: 📦 Upload artifact
+      - name: 📦 Upload para Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './frontend'
-          name: github-pages
+          path: "./frontend"
 
-      - name: 🚀 Deploy to GitHub Pages
+      - name: 🚀 Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages
 
-      - name: ✅ Success
+      - name: ✅ Sucesso
         run: |
-          echo "🎉 Deploy realizado com sucesso!"
+          echo ""
+          echo "🎉 DEPLOY CONCLUÍDO"
+          echo "═══════════════════════════════════════"
           echo "🔗 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "═══════════════════════════════════════"

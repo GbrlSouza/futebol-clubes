@@ -1,108 +1,171 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Futebol Clube - Visualização de Dados</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">
-                <i class="bi bi-trophy-fill me-2"></i>Futebol Clube
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="#">
+          <i class="bi bi-trophy-fill me-2"></i>Futebol Clube
+        </a>
+
+        <!-- Campo de Busca -->
+        <div class="d-flex align-items-center gap-2 ms-auto me-3 order-lg-last">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-0">
+              <i class="bi bi-search text-success"></i>
+            </span>
+            <input
+              type="text"
+              id="busca-clube"
+              class="form-control border-0"
+              placeholder="Buscar clube..."
+              autocomplete="off"
+              aria-label="Buscar clube"
+            />
+            <button
+              class="btn btn-light text-success border-0 d-none"
+              id="limpar-busca"
+              type="button"
+              title="Limpar busca"
+              aria-label="Limpar campo de busca"
+            >
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+              <span class="visually-hidden">Limpar busca</span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="app.switchView('alfabetico')">
-                            <i class="bi bi-grid-3x3-gap me-1"></i>Grid Alfabético
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="app.switchView('timeline')">
-                            <i class="bi bi-clock-history me-1"></i>Timeline
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="app.switchView('estados')">
-                            <i class="bi bi-map me-1"></i>Por Estado
-                        </a>
-                    </li>
-                </ul>
-            </div>
+          </div>
+          <span
+            class="badge bg-light text-success d-none"
+            id="resultado-busca"
+            aria-live="polite"
+            >0</span
+          >
         </div>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Alternar navegação"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                href="#"
+                onclick="app.switchView('alfabetico')"
+              >
+                <i class="bi bi-grid-3x3-gap me-1" aria-hidden="true"></i>Grid
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="app.switchView('timeline')">
+                <i class="bi bi-clock-history me-1" aria-hidden="true"></i
+                >Timeline
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="app.switchView('estados')">
+                <i class="bi bi-map me-1" aria-hidden="true"></i>Estados
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav>
 
     <div class="container-fluid py-4">
-        <div id="loading" class="text-center py-5">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-            <p class="mt-2 text-muted">Carregando dados...</p>
+      <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Carregando...</span>
         </div>
+        <p class="mt-2 text-muted">Carregando dados...</p>
+      </div>
 
-        <div id="error" class="alert alert-danger d-none" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span id="error-message">Erro ao carregar dados</span>
-        </div>
+      <div id="error" class="alert alert-danger d-none" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="error-message">Erro ao carregar dados</span>
+      </div>
 
-        <div id="view-alfabetico" class="view-section d-none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h4 mb-0">
-                    <i class="bi bi-grid-3x3-gap text-success me-2"></i>Grid Alfabético
-                </h2>
-                <span class="badge bg-success" id="count-alfabetico">0 clubes</span>
-            </div>
-            <div class="row g-4" id="grid-alfabetico">
-            </div>
+      <div id="view-alfabetico" class="view-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-grid-3x3-gap text-success me-2"></i>Grid Alfabético
+          </h2>
+          <span class="badge bg-success" id="count-alfabetico">0 clubes</span>
         </div>
+        <div class="row g-4" id="grid-alfabetico"></div>
+      </div>
 
-        <div id="view-timeline" class="view-section d-none">
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                <h2 class="h4 mb-0">
-                    <i class="bi bi-clock-history text-success me-2"></i>Timeline de Fundação
-                </h2>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-success active" onclick="app.loadTimeline('asc')">
-                        <i class="bi bi-sort-numeric-up me-1"></i>Mais Antigo
-                    </button>
-                    <button type="button" class="btn btn-outline-success" onclick="app.loadTimeline('desc')">
-                        <i class="bi bi-sort-numeric-down me-1"></i>Mais Recente
-                    </button>
-                </div>
-            </div>
-            <div class="timeline-container" id="timeline-content">
-            </div>
+      <div id="view-timeline" class="view-section d-none">
+        <div
+          class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
+        >
+          <h2 class="h4 mb-0">
+            <i class="bi bi-clock-history text-success me-2"></i>Timeline de
+            Fundação
+          </h2>
+          <div class="btn-group" role="group">
+            <button
+              type="button"
+              class="btn btn-outline-success active"
+              onclick="app.loadTimeline('asc')"
+            >
+              <i class="bi bi-sort-numeric-up me-1"></i>Mais Antigo
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-success"
+              onclick="app.loadTimeline('desc')"
+            >
+              <i class="bi bi-sort-numeric-down me-1"></i>Mais Recente
+            </button>
+          </div>
         </div>
+        <div class="timeline-container" id="timeline-content"></div>
+      </div>
 
-        <div id="view-estados" class="view-section d-none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h4 mb-0">
-                    <i class="bi bi-map text-success me-2"></i>Clubes por Estado
-                </h2>
-                <span class="badge bg-success" id="count-estados">0 estados</span>
-            </div>
-            <div class="accordion" id="accordion-estados">
-            </div>
+      <div id="view-estados" class="view-section d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-map text-success me-2"></i>Clubes por Estado
+          </h2>
+          <span class="badge bg-success" id="count-estados">0 estados</span>
         </div>
+        <div class="accordion" id="accordion-estados"></div>
+      </div>
     </div>
-  
+
     <footer class="bg-dark text-light py-3 mt-5">
-        <div class="container text-center">
-            <small class="text-muted">
-                <i class="bi bi-code-slash me-1"></i>API RESTful + Bootstrap 5 | 
-                <span id="total-clubes">0</span> clubes cadastrados
-            </small>
-        </div>
+      <div class="container text-center">
+        <small class="text-muted">
+          <i class="bi bi-code-slash me-1"></i>API RESTful + Bootstrap 5 |
+          <span id="total-clubes">0</span> clubes cadastrados
+        </small>
+      </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/app.js"></script>
-</body>
+  </body>
 </html>
