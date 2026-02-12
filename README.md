@@ -22,7 +22,7 @@ Sistema completo de visualização de clubes de futebol brasileiros com três mo
 1. **Fork este repositório**
 2. **Vá em Settings → Pages**
 3. **Source**: GitHub Actions
-4. **Pronto!** O site estará em `https://seuusuario.github.io/futebol-clubes`
+4. **Pronto!** O site estará em `https://GbrlSouza.github.io/futebol-clubes`
 
 ### Opção 2: Local (Desenvolvimento)
 
