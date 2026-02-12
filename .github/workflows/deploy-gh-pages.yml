@@ -37,7 +37,7 @@ jobs:
           echo "Verificando arquivos..."
           ls -la frontend/
           test -f frontend/index.html || (echo "❌ index.html não encontrado" && exit 1)
-          test -f frontend/data/clubes.json || (echo "❌ clubes.json não encontrado" && exit 1)
+          test -f backend/data/clubes.json || (echo "❌ clubes.json não encontrado" && exit 1)
           echo "✅ Estrutura OK"
 
       - name: 🔄 Sincronizar JSON
