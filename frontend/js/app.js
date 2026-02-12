@@ -47,7 +47,7 @@ class FutebolApp {
             state: clube.state || 'UF',
             founded: clube.founded || 1900,
             status: clube.status || 'active',
-            slug: clube.slug || clube.short_name?.toLowerCase() || 'clube',
+            slug: clube.slug || clube.short_name || 'placeholder',
             typeSlug: clube.typeSlug || '.png',
             site: clube.site || '#',
             uniforme: clube.uniforme || clube.slug || 'default',
