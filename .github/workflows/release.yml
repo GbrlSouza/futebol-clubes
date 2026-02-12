@@ -1,0 +1,35 @@
+name: 🏷️ Criar Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: 📝 Gerar Release Notes
+        run: |
+          echo "## 📊 Estatísticas da Base" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          node << 'EOF' >> RELEASE_NOTES.md
+          const data = require('./backend/data/clubes.json');
+          console.log(`- **Total de clubes:** ${data.length}`);
+          const estados = [...new Set(data.map(c => c.state))];
+          console.log(`- **Estados cobertos:** ${estados.length}`);
+          const anos = data.map(c => c.founded);
+          console.log(`- **Período:** ${Math.min(...anos)} - ${Math.max(...anos)}`);
+          console.log(`- **Status:** ${data.filter(c => c.status === 'active').length} ativos`);
+          EOF
+
+      - name: 🏷️ Criar Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            backend/data/clubes.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
