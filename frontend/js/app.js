@@ -1,16 +1,22 @@
 class FutebolApp {
     constructor() {
-        this.API_URL = 'http://localhost:3000/api';
+        this.isLocal = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+        
+        this.API_URL = this.isLocal ? 'http://localhost:3000/api' : null;
+        this.JSON_URL = 'data/clubes.json';
         this.currentView = 'alfabetico';
         this.data = {};
+        this.clubes = [];
         this.init();
     }
 
     async init() {
         try {
-            await this.loadAlfabetico();
-            await this.loadTimeline('asc');
-            await this.loadEstados();
+            await this.loadData();
+            this.renderAlfabetico();
+            this.renderTimeline('asc');
+            this.renderEstados();
             this.switchView('alfabetico');
             this.hideLoading();
         } catch (error) {
@@ -18,55 +24,149 @@ class FutebolApp {
         }
     }
 
-    showLoading() {
-        document.getElementById('loading').classList.remove('d-none');
-    }
-
-    hideLoading() {
-        document.getElementById('loading').classList.add('d-none');
-    }
-
-    showError(message) {
-        document.getElementById('loading').classList.add('d-none');
-        document.getElementById('error').classList.remove('d-none');
-        document.getElementById('error-message').textContent = message;
-    }
-
-    switchView(viewName) {
-        document.querySelectorAll('.view-section').forEach(el => {
-            el.classList.add('d-none');
-        });
-        
-        document.getElementById(`view-${viewName}`).classList.remove('d-none');
-        document.querySelectorAll('.nav-link').forEach(el => {
-            el.classList.remove('active');
-        });
-        event?.target?.classList.add('active');
-        
-        this.currentView = viewName;
-    }
-
-    async fetchData(endpoint) {
-        const response = await fetch(`${this.API_URL}${endpoint}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-    }
-
-    async loadAlfabetico() {
+    async loadData() {
         try {
-            const result = await this.fetchData('/clubes/alfabetico');
-            this.data.alfabetico = result.data;
-            this.renderAlfabetico(result.data);
-            document.getElementById('count-alfabetico').textContent = 
-                `${result.data.length} clube${result.data.length !== 1 ? 's' : ''}`;
+            if (this.isLocal) {
+                try {
+                    const response = await fetch(`${this.API_URL}/clubes`);
+                    const result = await response.json();
+                    this.clubes = result.data;
+                } catch (e) {
+                    const response = await fetch(this.JSON_URL);
+                    this.clubes = await response.json();
+                }
+            } else {
+                const response = await fetch(this.JSON_URL);
+                if (!response.ok) throw new Error('JSON não encontrado');
+                this.clubes = await response.json();
+            }
         } catch (error) {
-            console.error('Erro ao carregar grid alfabético:', error);
+            throw new Error('Não foi possível carregar os dados. Verifique se o arquivo clubes.json existe.');
         }
     }
 
-    renderAlfabetico(clubes) {
+    getAlfabetico() {
+        return [...this.clubes].sort((a, b) => 
+            a.short_name.localeCompare(b.short_name, 'pt-BR')
+        );
+    }
+
+    getTimeline(ordem = 'asc') {
+        return [...this.clubes].sort((a, b) => {
+            return ordem === 'desc' ? b.founded - a.founded : a.founded - b.founded;
+        });
+    }
+
+    getPorEstado() {
+        const porEstado = this.clubes.reduce((acc, clube) => {
+            const estado = clube.state;
+            if (!acc[estado]) acc[estado] = [];
+            acc[estado].push(clube);
+            return acc;
+        }, {});
+        
+        const resultado = {};
+        Object.keys(porEstado).sort().forEach(estado => {
+            resultado[estado] = porEstado[estado].sort((a, b) => 
+                a.short_name.localeCompare(b.short_name, 'pt-BR')
+            );
+        });
+        return resultado;
+    }
+
+    renderAlfabetico() {
+        const clubes = this.getAlfabetico();
         const container = document.getElementById('grid-alfabetico');
         container.innerHTML = clubes.map(clube => this.createCard(clube)).join('');
+        document.getElementById('count-alfabetico').textContent = 
+            `${clubes.length} clube${clubes.length !== 1 ? 's' : ''}`;
+    }
+
+    renderTimeline(ordem = 'asc') {
+        const clubes = this.getTimeline(ordem);
+        const container = document.getElementById('timeline-content');
+        const anoAtual = new Date().getFullYear();
+        
+        container.innerHTML = clubes.map((clube, index) => {
+            const idade = anoAtual - clube.founded;
+            const isMaisAntigo = ordem === 'asc' && index === 0;
+            
+            return `
+                <div class="timeline-item ${isMaisAntigo ? 'mais-antigo' : ''}">
+                    <div class="timeline-content">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="timeline-year">${clube.founded}</div>
+                            <span class="badge bg-success">${idade} anos</span>
+                        </div>
+                        <h5 class="fw-bold mb-1">${clube.full_name}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>${clube.city}, ${clube.state}
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
+                            </span>
+                            <a href="https://${clube.site}" target="_blank" 
+                               class="btn-wikipedia ms-auto">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Site
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        document.querySelectorAll('#view-timeline .btn-group .btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', 
+                (ordem === 'asc' && idx === 0) || (ordem === 'desc' && idx === 1)
+            );
+        });
+    }
+
+    renderEstados() {
+        const porEstado = this.getPorEstado();
+        const container = document.getElementById('accordion-estados');
+        const estadosNomes = {
+            'AC': 'Acre', 'AL': 'Alagoas', 'AP': 'Amapá', 'AM': 'Amazonas',
+            'BA': 'Bahia', 'CE': 'Ceará', 'DF': 'Distrito Federal', 'ES': 'Espírito Santo',
+            'GO': 'Goiás', 'MA': 'Maranhão', 'MT': 'Mato Grosso', 'MS': 'Mato Grosso do Sul',
+            'MG': 'Minas Gerais', 'PA': 'Pará', 'PB': 'Paraíba', 'PR': 'Paraná',
+            'PE': 'Pernambuco', 'PI': 'Piauí', 'RJ': 'Rio de Janeiro', 'RN': 'Rio Grande do Norte',
+            'RS': 'Rio Grande do Sul', 'RO': 'Rondônia', 'RR': 'Roraima', 'SC': 'Santa Catarina',
+            'SP': 'São Paulo', 'SE': 'Sergipe', 'TO': 'Tocantins'
+        };
+
+        container.innerHTML = Object.entries(porEstado).map(([sigla, clubes], index) => {
+            const nomeEstado = estadosNomes[sigla] || sigla;
+            return `
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" 
+                                type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse-${sigla}">
+                            <div class="estado-header">
+                                <span class="estado-sigla">${sigla}</span>
+                                <span class="estado-nome">${nomeEstado}</span>
+                                <span class="badge bg-secondary ms-2">${clubes.length}</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-${sigla}" 
+                         class="accordion-collapse collapse ${index === 0 ? 'show' : ''}"
+                         data-bs-parent="#accordion-estados">
+                        <div class="accordion-body p-0">
+                            <div class="clubes-list">
+                                ${clubes.map(clube => this.createMiniCard(clube)).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('count-estados').textContent = 
+            `${Object.keys(porEstado).length} estado${Object.keys(porEstado).length !== 1 ? 's' : ''}`;
+        document.getElementById('total-clubes').textContent = this.clubes.length;
     }
 
     createCard(clube) {
@@ -114,112 +214,6 @@ class FutebolApp {
         `;
     }
 
-    async loadTimeline(ordem = 'asc') {
-        try {
-            const result = await this.fetchData(`/clubes/timeline?ordem=${ordem}`);
-            this.data.timeline = result.data;
-            this.renderTimeline(result.data, ordem);
-        } catch (error) {
-            console.error('Erro ao carregar timeline:', error);
-        }
-    }
-
-    renderTimeline(clubes, ordem) {
-        const container = document.getElementById('timeline-content');
-        const anoAtual = new Date().getFullYear();
-        
-        container.innerHTML = clubes.map((clube, index) => {
-            const idade = anoAtual - clube.founded;
-            const isMaisAntigo = ordem === 'asc' && index === 0;
-            
-            return `
-                <div class="timeline-item ${isMaisAntigo ? 'mais-antigo' : ''}">
-                    <div class="timeline-content">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="timeline-year">${clube.founded}</div>
-                            <span class="badge bg-success">${idade} anos</span>
-                        </div>
-                        <h5 class="fw-bold mb-1">${clube.full_name}</h5>
-                        <p class="text-muted mb-2">
-                            <i class="bi bi-geo-alt me-1"></i>${clube.city}, ${clube.state}
-                        </p>
-                        <div class="d-flex gap-2 mt-3">
-                            <span class="badge bg-light text-dark border">
-                                <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
-                            </span>
-                            <a href="https://${clube.site}" target="_blank" 
-                               class="btn-wikipedia ms-auto">
-                                <i class="bi bi-box-arrow-up-right me-1"></i>Site
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        document.querySelectorAll('#view-timeline .btn-group .btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        const btnIndex = ordem === 'asc' ? 0 : 1;
-        document.querySelectorAll('#view-timeline .btn-group .btn')[btnIndex].classList.add('active');
-    }
-
-    async loadEstados() {
-        try {
-            const result = await this.fetchData('/clubes/estados');
-            this.data.estados = result.data;
-            this.renderEstados(result.data);
-            document.getElementById('count-estados').textContent = 
-                `${result.count} estado${result.count !== 1 ? 's' : ''}`;
-            
-            const total = Object.values(result.data).flat().length;
-            document.getElementById('total-clubes').textContent = total;
-        } catch (error) {
-            console.error('Erro ao carregar estados:', error);
-        }
-    }
-
-    renderEstados(porEstado) {
-        const container = document.getElementById('accordion-estados');
-        const estadosNomes = {
-            'AC': 'Acre', 'AL': 'Alagoas', 'AP': 'Amapá', 'AM': 'Amazonas',
-            'BA': 'Bahia', 'CE': 'Ceará', 'DF': 'Distrito Federal', 'ES': 'Espírito Santo',
-            'GO': 'Goiás', 'MA': 'Maranhão', 'MT': 'Mato Grosso', 'MS': 'Mato Grosso do Sul',
-            'MG': 'Minas Gerais', 'PA': 'Pará', 'PB': 'Paraíba', 'PR': 'Paraná',
-            'PE': 'Pernambuco', 'PI': 'Piauí', 'RJ': 'Rio de Janeiro', 'RN': 'Rio Grande do Norte',
-            'RS': 'Rio Grande do Sul', 'RO': 'Rondônia', 'RR': 'Roraima', 'SC': 'Santa Catarina',
-            'SP': 'São Paulo', 'SE': 'Sergipe', 'TO': 'Tocantins'
-        };
-
-        container.innerHTML = Object.entries(porEstado).map(([sigla, clubes], index) => {
-            const nomeEstado = estadosNomes[sigla] || sigla;
-            return `
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" 
-                                type="button" data-bs-toggle="collapse" 
-                                data-bs-target="#collapse-${sigla}">
-                            <div class="estado-header">
-                                <span class="estado-sigla">${sigla}</span>
-                                <span class="estado-nome">${nomeEstado}</span>
-                                <span class="badge bg-secondary ms-2">${clubes.length}</span>
-                            </div>
-                        </button>
-                    </h2>
-                    <div id="collapse-${sigla}" 
-                         class="accordion-collapse collapse ${index === 0 ? 'show' : ''}"
-                         data-bs-parent="#accordion-estados">
-                        <div class="accordion-body p-0">
-                            <div class="clubes-list">
-                                ${clubes.map(clube => this.createMiniCard(clube)).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
     createMiniCard(clube) {
         return `
             <div class="clube-mini-card">
@@ -237,6 +231,32 @@ class FutebolApp {
                 </a>
             </div>
         `;
+    }
+
+    switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('d-none'));
+        document.getElementById(`view-${viewName}`).classList.remove('d-none');
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        if (event?.target) event.target.classList.add('active');
+        this.currentView = viewName;
+    }
+
+    showLoading() {
+        document.getElementById('loading').classList.remove('d-none');
+    }
+
+    hideLoading() {
+        document.getElementById('loading').classList.add('d-none');
+    }
+
+    showError(message) {
+        document.getElementById('loading').classList.add('d-none');
+        document.getElementById('error').classList.remove('d-none');
+        document.getElementById('error-message').textContent = message;
+    }
+
+    loadTimeline(ordem) {
+        this.renderTimeline(ordem);
     }
 }
 
