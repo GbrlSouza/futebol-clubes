@@ -89,9 +89,7 @@ class FutebolApp {
     }
 
     getEscudoUrl(clube) {
-        if (!clube.slug || !clube.typeSlug) {
-            return null;
-        }
+        if (!clube.slug || !clube.typeSlug) { return `placeholder.png`; }
         return `${this.IMAGES_PATH}${clube.slug}${clube.typeSlug}`;
     }
 
