@@ -2,32 +2,20 @@
   "name": "futebol-clubes",
   "version": "1.0.0",
   "description": "Sistema de visualização de clubes de futebol brasileiros",
-  "keywords": [
-    "futebol",
-    "clubes",
-    "brasileirao",
-    "api",
-    "bootstrap"
-  ],
-  "homepage": "https://github.com/GbrlSouza/futebol-clubes#readme",
-  "bugs": {
-    "url": "https://github.com/GbrlSouza/futebol-clubes/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/GbrlSouza/futebol-clubes.git"
-  },
-  "license": "MIT",
-  "author": "Gabriel Costa de Souza",
-  "type": "commonjs",
-  "main": "index.js",
   "scripts": {
     "setup": "chmod +x scripts/*.sh && ./scripts/setup.sh",
     "dev": "./scripts/dev.sh",
     "server": "cd backend && npm start",
     "static": "npx http-server frontend -p 8080 -o",
     "deploy": "./scripts/deploy.sh",
-    "sync": "mkdir -p backend/data && cp backend/data/clubes.json backend/data/clubes.json",
+    "sync": "mkdir -p frontend/data && cp backend/data/clubes.json frontend/data/clubes.json",
     "validate": "node -e \"JSON.parse(require('fs').readFileSync('backend/data/clubes.json')); console.log('✅ JSON válido')\""
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SEU_USUARIO/futebol-clubes.git"
+  },
+  "keywords": ["futebol", "clubes", "brasileirao", "api", "bootstrap"],
+  "author": "Seu Nome",
+  "license": "MIT"
 }

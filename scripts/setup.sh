@@ -24,7 +24,7 @@ npm install -g http-server
 
 echo -e "${YELLOW}🔗 Criando link do JSON para frontend...${NC}"
 mkdir -p frontend/data
-cp backend/data/clubes.json backend/data/clubes.json
+cp backend/data/clubes.json frontend/data/clubes.json
 
 echo -e "${GREEN}✅ Setup completo!${NC}"
 echo ""
