@@ -40,18 +40,18 @@ jobs:
       - name: 🔄 Sincronizar JSON
         run: |
           mkdir -p frontend/data
-          cp backend/data/clubes.json frontend/data/clubes.json
+          cp backend/data/clubes.json backend/data/clubes.json
           echo "✅ JSON sincronizado"
 
       - name: 🔍 Validar JSON
         run: |
-          node -e "JSON.parse(require('fs').readFileSync('frontend/data/clubes.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('backend/data/clubes.json'))"
           echo "✅ JSON válido"
 
       - name: 📊 Gerar estatísticas
         run: |
           node << 'EOF'
-          const data = require('./frontend/data/clubes.json');
+          const data = require('./backend/data/clubes.json');
           console.log(`📊 Total de clubes: ${data.length}`);
           const estados = [...new Set(data.map(c => c.state))].sort();
           console.log(`🗺️  Estados: ${estados.join(', ')}`);

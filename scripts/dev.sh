@@ -6,10 +6,10 @@ NC='\033[0m'
 
 echo -e "${GREEN}🚀 Iniciando ambiente de desenvolvimento...${NC}"
 
-if [ ! -f "frontend/data/clubes.json" ]; then
+if [ ! -f "backend/data/clubes.json" ]; then
     echo -e "${YELLOW}⚠️  Copiando JSON para frontend...${NC}"
     mkdir -p frontend/data
-    cp backend/data/clubes.json frontend/data/clubes.json
+    cp backend/data/clubes.json backend/data/clubes.json
 fi
 
 echo -e "${GREEN}📡 Iniciando API (Node.js)...${NC}"
