@@ -18,6 +18,7 @@ class FutebolApp {
             this.renderEstados();
             this.switchView('alfabetico');
             this.hideLoading();
+            this.setupImageErrorHandling();
         } catch (error) {
             this.showError('Erro ao inicializar aplicação: ' + error.message);
             console.error('Stack:', error);
@@ -97,28 +98,40 @@ class FutebolApp {
     renderEscudo(clube, size = 'normal') {
         const url = this.getEscudoUrl(clube);
         const alt = `Escudo ${clube.full_name}`;
-        const safeId = `escudo-${clube.slug}-${Math.random().toString(36).substr(2, 9)}`;
         
         const sizes = {
-            small: { width: 50, height: 50, class: 'escudo-small' },
-            normal: { width: 100, height: 100, class: 'escudo-normal' },
-            large: { width: 140, height: 140, class: 'escudo-large' }
+            small: { class: 'escudo-small' },
+            normal: { class: 'escudo-normal' },
+            large: { class: 'escudo-large' }
         };
         
         const sizeConfig = sizes[size] || sizes.normal;
-        
+    
         if (!url) {
             return this.renderPlaceholder(clube, size);
         }
         
         return `
-            <div class="escudo-container ${sizeConfig.class}" id="${safeId}" data-clube="${clube.short_name}" data-size="${size}">
+            <div class="escudo-container ${sizeConfig.class}" 
+                 data-escudo="true"
+                 data-clube="${this.escapeHtml(clube.short_name)}" 
+                 data-size="${size}">
                 <img src="${url}" 
-                     alt="${alt}" 
+                     alt="${this.escapeHtml(alt)}" 
                      loading="lazy"
-                     onerror="document.getElementById('${safeId}').innerHTML='${this.renderPlaceholder(clube, size).replace(/'/g, '"')}'">
+                     data-has-fallback="true">
             </div>
         `;
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     renderPlaceholder(clube, size = 'normal') {
@@ -148,10 +161,27 @@ class FutebolApp {
         };
     }
 
+    setupImageErrorHandling() {
+        document.addEventListener('error', (e) => {
+            const img = e.target;
+            if (img.tagName === 'IMG' && img.dataset.hasFallback === 'true') {
+                e.preventDefault();
+                const container = img.closest('[data-escudo="true"]');
+                if (container) {
+                    const clubeShort = container.dataset.clube;
+                    const size = container.dataset.size || 'normal';
+                    const clube = this.clubes.find(c => c.short_name === clubeShort);
+                    if (clube) {
+                        container.innerHTML = this.renderPlaceholder(clube, size);
+                    }
+                }
+            }
+        }, true);
+    }
+
     renderAlfabetico() {
         const clubes = this.getAlfabetico();
         const container = document.getElementById('grid-alfabetico');
-        
         container.innerHTML = clubes.map(clube => this.createCard(clube)).join('');
         document.getElementById('count-alfabetico').textContent = 
             `${clubes.length} clube${clubes.length !== 1 ? 's' : ''}`;
