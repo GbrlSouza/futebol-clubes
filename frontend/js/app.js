@@ -3,7 +3,7 @@ class FutebolApp {
         this.isLocal = window.location.hostname === 'localhost' || 
                        window.location.hostname === '127.0.0.1';
         this.JSON_URL = 'data/clubes.json';
-        this.IMAGES_PATH = 'images/escudos/';
+        this.IMAGES_PATH = './images/escudos/';
         this.currentView = 'alfabetico';
         this.data = {};
         this.clubes = [];
