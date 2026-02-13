@@ -19,7 +19,6 @@ class FutebolApp {
     try {
       await this.loadEstados();
       await this.loadData();
-
       this.setupBusca();
       this.renderAlfabetico();
       this.renderTimeline("asc");
@@ -28,7 +27,9 @@ class FutebolApp {
       this.switchView("alfabetico");
       this.hideLoading();
       this.setupImageErrorHandling();
-      this.setupAdmin();
+
+      console.log("App pronto, disparando evento clubesCarregados");
+      window.dispatchEvent(new CustomEvent("clubesCarregados"));
     } catch (error) {
       this.showError("Erro ao inicializar aplicação: " + error.message);
       console.error("Stack:", error);
@@ -52,9 +53,10 @@ class FutebolApp {
 
   setupAdmin() {
     adminModal = new AdminModal();
-    adminModal.addAdminButtons();
 
-    setTimeout(() => adminModal.addEditButtonsToCards(), 500);
+    if (adminModal && adminModal.isAdminMode()) {
+      setTimeout(() => adminModal.init(), 500);
+    }
   }
 
   async loadEstados() {
@@ -480,30 +482,35 @@ class FutebolApp {
     const hasLyrics =
       clube.anthem?.lyrics_url && clube.anthem.lyrics_url !== "#";
     const hasSite = clube.site && clube.site !== "#";
+    const placeholder = `${this.BASE_PATH}/images/estadios/placeholder.jpg`;
 
     let estadioStyle = "";
     let estadioClass = "escudo-header";
 
     if (clube.estadioImagens && clube.estadioImagens.length > 0) {
-      const imagens = clube.estadioImagens
-        .map((img) => `url('${this.BASE_PATH}/${img}')`)
-        .join(", ");
-      estadioStyle = `background-image: ${imagens}; background-size: cover; background-position: center;`;
+      estadioStyle = `background-image: url('${this.BASE_PATH}/${clube.estadioImagens[0]}'); 
+                  background-size: cover; 
+                  background-position: center;`;
       estadioClass += " has-estadio";
 
       if (clube.estadioImagens.length > 1) {
         estadioClass += " estadio-slideshow";
-        clube.estadioImagens.forEach((_, i) => {
+
+        clube.estadioImagens.forEach((img, i) => {
           setTimeout(() => {
             const card = document.querySelector(
               `[data-slug="${clube.slug}"] .escudo-header`,
             );
             if (card) {
-              card.style.backgroundImage = `url('${this.BASE_PATH}/${clube.estadioImagens[i]}')`;
+              card.style.backgroundImage = `url('${this.BASE_PATH}/${img}')`;
             }
           }, i * 5000);
         });
       }
+    } else {
+      estadioStyle = `background-image: url('${placeholder}'); 
+                  background-size: cover; 
+                  background-position: center;`;
     }
 
     return `
