@@ -32,6 +32,9 @@ body {
   box-shadow: none;
 }
 
+img,
+.card-title { cursor: pointer; }
+
 /* Destaque de resultado da busca */
 .clube-card.destaque {
   animation: pulseDestaque 2s ease-in-out infinite;

@@ -409,7 +409,7 @@ class FutebolApp {
 
       miniCards.forEach((card) => {
         const titulo =
-          card.querySelector("h6")?.textContent.toLowerCase() || "";
+          card.querySelector("#mini-card-title")?.textContent.toLowerCase() || "";
         const local =
           card.querySelector("small")?.textContent.toLowerCase() || "";
 
@@ -597,13 +597,13 @@ class FutebolApp {
                                     <div class="timeline-year">${clube.founded}</div>
                                     <span class="badge bg-success">${idade} anos</span>
                                 </div>
-                                <h5 class="fw-bold mb-1">${clube.full_name}</h5>
+                                <h5 class="fw-bold mb-1">${clube.short_name}</h5>
                                 <p class="text-muted mb-2">
                                     <i class="bi bi-geo-alt me-1"></i>${clube.city}, ${clube.state}
                                 </p>
                                 <div class="d-flex gap-2 mt-3">
                                     <span class="badge bg-light text-dark border">
-                                        <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
+                                        <i class="bi bi-shield-fill me-1"></i>${clube.full_name}
                                     </span>
                                     ${hasSite
             ? `
@@ -680,7 +680,7 @@ class FutebolApp {
             <div class="clube-mini-card">
                 ${this.renderEscudo(clube, "small")}
                 <div class="flex-grow-1">
-                    <h6 class="mb-1 fw-bold">${clube.full_name}</h6>
+                    <h6 id="mini-card-title" class="card-title fw-bold mb-1">${clube.short_name}</h6>
                     <small class="text-muted d-block">
                         <i class="bi bi-geo-alt me-1"></i>${clube.city} • 
                         <i class="bi bi-calendar me-1"></i>${clube.founded}

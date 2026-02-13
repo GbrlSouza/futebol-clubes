@@ -14,31 +14,44 @@ class AbecedarioNav {
 
   render() {
     const html = `
-            <div class="abecedario-nav">
-                <div class="abecedario-scroll">
-                    ${this.letras
-                      .map(
-                        (letra) => `
-                        <button class="abecedario-letra" 
-                                data-letra="${letra}" 
-                                onclick="abecedarioNav.scrollToLetter('${letra}')"
-                                aria-label="Ir para clubes com ${letra}">
-                            ${letra}
-                        </button>
-                    `,
-                      )
-                      .join("")}
-                </div>
-                <button class="abecedario-top" 
-                        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
-                        title="Voltar ao topo"
-                        aria-label="Voltar ao topo">
-                    <i class="bi bi-arrow-up"></i>
-                </button>
+        <div class="abecedario-nav">
+            <div class="abecedario-scroll">
+                ${this.letras
+        .map(
+          (letra) => `
+                    <button class="abecedario-letra" 
+                            data-letra="${letra}"
+                            aria-label="Ir para clubes com ${letra}">
+                        ${letra}
+                    </button>
+                `,
+        )
+        .join("")}
             </div>
-        `;
+            <button class="abecedario-top" 
+                    title="Voltar ao topo"
+                    aria-label="Voltar ao topo">
+                <i class="bi bi-arrow-up"></i>
+            </button>
+        </div>
+    `;
 
     this.container.innerHTML = html;
+    this.attachEvents();
+  }
+
+  attachEvents() {
+    this.container.querySelectorAll('.abecedario-letra').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const letra = e.target.dataset.letra;
+        this.scrollToLetter(letra);
+      });
+    });
+
+    // Evento do botão topo
+    this.container.querySelector('.abecedario-top').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 
   scrollToLetter(letra) {
@@ -105,7 +118,7 @@ class AbecedarioNav {
       const cardTop = rect.top + window.scrollY;
 
       if (cardTop <= scrollPos) {
-        const titulo = card.querySelector("#card-title")?.textContent || "";
+        const titulo = card.querySelector(".card-title")?.dataset.title || "";
         letraAtiva = titulo.charAt(0).toUpperCase();
       }
     }
