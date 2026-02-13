@@ -527,7 +527,7 @@ class FutebolApp {
                         <p class="fw-medium text-secondary mb-0">${clube.full_name}</p>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">${clube.short_name}</h5>
+                        <h5 id="card-title" class="card-title fw-bold">${clube.short_name}</h5>
                         <p class="text-success mb-2">
                             <i class="bi bi-geo-fill me-1"></i>${clube.city}
                         </p>

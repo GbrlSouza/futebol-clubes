@@ -46,7 +46,7 @@ class AbecedarioNav {
     let encontrado = false;
 
     for (const card of cards) {
-      const titulo = card.querySelector(".card-title")?.textContent || "";
+      const titulo = card.querySelector("#card-title")?.textContent || "";
       const primeiraLetra = titulo.charAt(0).toUpperCase();
 
       if (primeiraLetra === letra) {
@@ -105,7 +105,7 @@ class AbecedarioNav {
       const cardTop = rect.top + window.scrollY;
 
       if (cardTop <= scrollPos) {
-        const titulo = card.querySelector(".card-title")?.textContent || "";
+        const titulo = card.querySelector("#card-title")?.textContent || "";
         letraAtiva = titulo.charAt(0).toUpperCase();
       }
     }
