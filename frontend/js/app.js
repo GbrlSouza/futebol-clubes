@@ -19,6 +19,7 @@ class FutebolApp {
     try {
       await this.loadEstados();
       await this.loadData();
+
       this.setupBusca();
       this.renderAlfabetico();
       this.renderTimeline("asc");
@@ -221,11 +222,11 @@ class FutebolApp {
     const colors = this.generateColors(clube.short_name);
 
     return `
-            <div class="escudo-placeholder ${size}" 
-                 style="background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);">
-                <span>${initials}</span>
-            </div>
-        `;
+      <div class="escudo-placeholder ${size}" 
+          style="background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);">
+        <span>${initials}</span>
+      </div>
+    `;
   }
 
   generateColors(str) {
@@ -292,10 +293,14 @@ class FutebolApp {
 
     btnLimpar.addEventListener("click", () => {
       inputBusca.value = "";
+
       this.termoBusca = "";
+
       btnLimpar.classList.add("d-none");
       badgeResultado.classList.add("d-none");
+
       this.aplicarBusca();
+
       inputBusca.focus();
     });
 
@@ -304,6 +309,7 @@ class FutebolApp {
         if (this.autoScrollTimeout) {
           clearTimeout(this.autoScrollTimeout);
         }
+
         this.navegarParaPrimeiroResultado();
       }
     });
@@ -313,26 +319,20 @@ class FutebolApp {
     const badgeResultado = document.getElementById("resultado-busca");
 
     if (!this.termoBusca) {
-      document.querySelectorAll(".destaque, .oculto").forEach((el) => {
-        el.classList.remove("destaque", "oculto");
-      });
+      document.querySelectorAll(".destaque, .oculto").forEach((el) => { el.classList.remove("destaque", "oculto"); });
       badgeResultado.classList.add("d-none");
+
       return;
     }
 
     let totalEncontrados = 0;
 
-    if (this.currentView === "alfabetico") {
-      totalEncontrados = this.aplicarBuscaGrid();
-    } else if (this.currentView === "timeline") {
-      totalEncontrados = this.aplicarBuscaTimeline();
-    } else if (this.currentView === "estados") {
-      totalEncontrados = this.aplicarBuscaEstados();
-    }
+    if (this.currentView === "alfabetico") { totalEncontrados = this.aplicarBuscaGrid(); }
+    else if (this.currentView === "timeline") { totalEncontrados = this.aplicarBuscaTimeline(); }
+    else if (this.currentView === "estados") { totalEncontrados = this.aplicarBuscaEstados(); }
 
     badgeResultado.textContent = totalEncontrados;
     badgeResultado.classList.toggle("d-none", totalEncontrados === 0);
-
     badgeResultado.setAttribute(
       "aria-label",
       `${totalEncontrados} resultados encontrados`,
@@ -523,9 +523,12 @@ class FutebolApp {
                             <i class="bi bi-geo-alt-fill me-1"></i>${clube.state}
                         </span>
                     </div>
+                    <div class="card-header bg-transparent border-0">
+                        <p class="fw-medium text-secondary mb-0">${clube.full_name}</p>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title fw-bold mb-1">${clube.full_name}</h5>
-                        <p class="text-muted mb-2">
+                        <h5 class="card-title fw-bold">${clube.short_name}</h5>
+                        <p class="text-success mb-2">
                             <i class="bi bi-geo-fill me-1"></i>${clube.city}
                         </p>
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -535,34 +538,32 @@ class FutebolApp {
                             <small class="text-muted">${idade} anos</small>
                         </div>
                         <div class="d-flex gap-2">
-                            ${
-                              hasSite
-                                ? `
+                            ${hasSite
+        ? `
                                 <a href="https://${clube.site}" target="_blank" 
                                    class="btn btn-success btn-sm flex-fill">
                                     <i class="bi bi-globe me-1"></i>Site
                                 </a>
                             `
-                                : `
+        : `
                                 <button class="btn btn-secondary btn-sm flex-fill" disabled>
                                     <i class="bi bi-globe me-1"></i>Site
                                 </button>
                             `
-                            }
-                            ${
-                              hasLyrics
-                                ? `
+      }
+                            ${hasLyrics
+        ? `
                                 <a href="${clube.anthem.lyrics_url}" target="_blank" 
                                    class="btn btn-outline-secondary btn-sm" title="Hino">
                                     <i class="bi bi-music-note-beamed"></i>
                                 </a>
                             `
-                                : `
+        : `
                                 <button class="btn btn-outline-secondary btn-sm" disabled title="Hino não disponível">
                                     <i class="bi bi-music-note-beamed"></i>
                                 </button>
                             `
-                            }
+      }
                         </div>
                     </div>
                     <div class="card-footer bg-transparent border-0 pt-0">
@@ -604,16 +605,15 @@ class FutebolApp {
                                     <span class="badge bg-light text-dark border">
                                         <i class="bi bi-shield-fill me-1"></i>${clube.short_name}
                                     </span>
-                                    ${
-                                      hasSite
-                                        ? `
+                                    ${hasSite
+            ? `
                                         <a href="https://${clube.site}" target="_blank" 
                                            class="btn-wikipedia ms-auto">
                                             <i class="bi bi-box-arrow-up-right me-1"></i>Site
                                         </a>
                                     `
-                                        : '<span class="text-muted ms-auto small">Site indisponível</span>'
-                                    }
+            : '<span class="text-muted ms-auto small">Site indisponível</span>'
+          }
                                 </div>
                             </div>
                         </div>
@@ -686,16 +686,15 @@ class FutebolApp {
                         <i class="bi bi-calendar me-1"></i>${clube.founded}
                     </small>
                 </div>
-                ${
-                  hasSite
-                    ? `
+                ${hasSite
+        ? `
                     <a href="https://${clube.site}" target="_blank" 
                        class="btn btn-sm btn-outline-success">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </a>
                 `
-                    : '<span class="text-muted small">-</span>'
-                }
+        : '<span class="text-muted small">-</span>'
+      }
             </div>
         `;
   }
