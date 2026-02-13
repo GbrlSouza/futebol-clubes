@@ -1,394 +1,669 @@
 :root {
-    --primary-color: #198754;
-    --secondary-color: #f8f9fa;
-    --accent-color: #ffc107;
-    --timeline-line: #dee2e6;
+  --primary-color: #198754;
+  --secondary-color: #f8f9fa;
+  --accent-color: #ffc107;
+  --timeline-line: #dee2e6;
 }
 
 body {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container-fluid {
-    flex: 1;
+  flex: 1;
 }
 
 /* Campo de Busca */
 .navbar .input-group {
-    width: 250px;
-    border-radius: 25px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 250px;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .navbar .form-control {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
 .navbar .form-control:focus {
-    box-shadow: none;
+  box-shadow: none;
 }
 
 /* Destaque de resultado da busca */
 .clube-card.destaque {
-    animation: pulseDestaque 2s ease-in-out infinite;
-    border: 3px solid var(--accent-color);
-    box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+  animation: pulseDestaque 2s ease-in-out infinite;
+  border: 3px solid var(--accent-color);
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
 }
 
 .clube-card.oculto {
-    opacity: 0.3;
-    transform: scale(0.95);
-    filter: grayscale(70%);
+  opacity: 0.3;
+  transform: scale(0.95);
+  filter: grayscale(70%);
 }
 
 .timeline-item.destaque .timeline-content {
-    animation: pulseDestaque 2s ease-in-out infinite;
-    border-left-color: var(--accent-color);
-    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+  animation: pulseDestaque 2s ease-in-out infinite;
+  border-left-color: var(--accent-color);
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
 }
 
 .timeline-item.oculto {
-    opacity: 0.3;
-    filter: grayscale(70%);
+  opacity: 0.3;
+  filter: grayscale(70%);
 }
 
 .accordion-item.destaque {
-    animation: pulseDestaque 2s ease-in-out infinite;
-    border: 2px solid var(--accent-color);
-    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+  animation: pulseDestaque 2s ease-in-out infinite;
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
 }
 
 .accordion-item.oculto {
-    opacity: 0.4;
+  opacity: 0.4;
 }
 
 .clube-mini-card.destaque {
-    animation: pulseDestaque 2s ease-in-out infinite;
-    background: #fff3cd;
-    border: 2px solid var(--accent-color);
+  animation: pulseDestaque 2s ease-in-out infinite;
+  background: #fff3cd;
+  border: 2px solid var(--accent-color);
 }
 
 .clube-mini-card.oculto {
-    opacity: 0.4;
-    filter: grayscale(70%);
+  opacity: 0.4;
+  filter: grayscale(70%);
 }
 
 @keyframes pulseDestaque {
-    0%, 100% { 
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
-    }
-    50% { 
-        transform: scale(1.02);
-        box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
-    }
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+  }
 }
 
 /* Cards */
 .clube-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: none;
-    border-radius: 12px;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .clube-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Escudos no Card */
 .escudo-header {
-    height: 160px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .clube-card .badge-estado {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 0.8rem;
-    padding: 0.4em 0.8em;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.8rem;
+  padding: 0.4em 0.8em;
 }
 
 .clube-card .card-body {
-    padding: 1.25rem;
+  padding: 1.25rem;
 }
 
 /* Escudos */
 .escudo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border-radius: 50%;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
 .escudo-container:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .escudo-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 5px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
 }
 
 /* Tamanhos dos Escudos */
 .escudo-small {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
 }
 
 .escudo-normal {
-    width: 100px;
-    height: 100px;
+  width: 100px;
+  height: 100px;
 }
 
 .escudo-large {
-    width: 140px;
-    height: 140px;
+  width: 140px;
+  height: 140px;
 }
 
 /* Placeholder quando não há imagem */
 .escudo-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: white;
-    font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .escudo-placeholder.small {
-    width: 50px;
-    height: 50px;
-    font-size: 1rem;
-    min-width: 50px;
+  width: 50px;
+  height: 50px;
+  font-size: 1rem;
+  min-width: 50px;
 }
 
 .escudo-placeholder.normal {
-    width: 100px;
-    height: 100px;
-    font-size: 1.8rem;
+  width: 100px;
+  height: 100px;
+  font-size: 1.8rem;
 }
 
 .escudo-placeholder.large {
-    width: 140px;
-    height: 140px;
-    font-size: 2.5rem;
+  width: 140px;
+  height: 140px;
+  font-size: 2.5rem;
 }
 
 /* Timeline */
 .timeline-container {
-    position: relative;
-    padding-left: 30px;
+  position: relative;
+  padding-left: 30px;
 }
 
 .timeline-container::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--timeline-line);
-    border-radius: 2px;
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--timeline-line);
+  border-radius: 2px;
 }
 
 .timeline-item {
-    position: relative;
-    margin-bottom: 2rem;
-    padding-left: 2rem;
+  position: relative;
+  margin-bottom: 2rem;
+  padding-left: 2rem;
 }
 
 .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -34px;
-    top: 5px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    border: 3px solid white;
-    box-shadow: 0 0 0 3px var(--primary-color);
+  content: "";
+  position: absolute;
+  left: -34px;
+  top: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  border: 3px solid white;
+  box-shadow: 0 0 0 3px var(--primary-color);
 }
 
 .timeline-item.mais-antigo::before {
-    background: #6c757d;
-    box-shadow: 0 0 0 3px #6c757d;
+  background: #6c757d;
+  box-shadow: 0 0 0 3px #6c757d;
 }
 
 .timeline-content {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-left: 4px solid var(--primary-color);
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid var(--primary-color);
 }
 
 .timeline-content .escudo-container,
 .timeline-content .escudo-placeholder {
-    margin-top: 5px;
-    flex-shrink: 0;
+  margin-top: 5px;
+  flex-shrink: 0;
 }
 
 .timeline-year {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
 }
 
 /* Estados Accordion */
 .accordion-item {
-    border: none;
-    margin-bottom: 1rem;
-    border-radius: 12px !important;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: none;
+  margin-bottom: 1rem;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .accordion-button {
-    font-weight: 600;
-    padding: 1.25rem;
-    background: white;
+  font-weight: 600;
+  padding: 1.25rem;
+  background: white;
 }
 
 .accordion-button:not(.collapsed) {
-    background-color: #e8f5e9;
-    color: var(--primary-color);
-    box-shadow: none;
+  background-color: #e8f5e9;
+  color: var(--primary-color);
+  box-shadow: none;
 }
 
 .accordion-button:focus {
-    box-shadow: none;
-    border-color: rgba(25, 135, 84, 0.25);
+  box-shadow: none;
+  border-color: rgba(25, 135, 84, 0.25);
 }
 
 .estado-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .estado-sigla {
-    background: var(--primary-color);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 0.9rem;
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .estado-nome {
-    font-size: 1.1rem;
+  font-size: 1.1rem;
 }
 
 .clubes-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .clube-mini-card {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: background 0.2s;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: background 0.2s;
 }
 
 .clube-mini-card:hover {
-    background: #e9ecef;
+  background: #e9ecef;
 }
 
 .clube-mini-card .escudo-container,
 .clube-mini-card .escudo-placeholder {
-    flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 /* Responsividade */
 @media (max-width: 991px) {
-    .navbar .input-group {
-        width: 100%;
-        margin: 10px 0;
-    }
+  .navbar .input-group {
+    width: 100%;
+    margin: 10px 0;
+  }
 }
 
 @media (max-width: 768px) {
-    .timeline-container {
-        padding-left: 20px;
-    }
-    
-    .timeline-item {
-        padding-left: 1rem;
-    }
-    
-    .timeline-item::before {
-        left: -24px;
-    }
-    
-    .clubes-list {
-        grid-template-columns: 1fr;
-    }
-    
-    .escudo-normal {
-        width: 80px;
-        height: 80px;
-    }
-    
-    .escudo-placeholder.normal {
-        width: 80px;
-        height: 80px;
-        font-size: 1.5rem;
-    }
+  .timeline-container {
+    padding-left: 20px;
+  }
+
+  .timeline-item {
+    padding-left: 1rem;
+  }
+
+  .timeline-item::before {
+    left: -24px;
+  }
+
+  .clubes-list {
+    grid-template-columns: 1fr;
+  }
+
+  .escudo-normal {
+    width: 80px;
+    height: 80px;
+  }
+
+  .escudo-placeholder.normal {
+    width: 80px;
+    height: 80px;
+    font-size: 1.5rem;
+  }
 }
 
 /* Animações */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .view-section:not(.d-none) {
-    animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
 /* Links externos */
 .btn-wikipedia {
-    color: #6c757d;
-    text-decoration: none;
-    font-size: 0.9rem;
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 0.9rem;
 }
 
 .btn-wikipedia:hover {
-    color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .badge-fundacao {
-    background: linear-gradient(135deg, var(--accent-color) 0%, #ff9800 100%);
-    color: #000;
-    font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-color) 0%, #ff9800 100%);
+  color: #000;
+  font-weight: 600;
+}
+
+/* Abecedário Horizontal no Topo */
+.abecedario-wrapper {
+  position: sticky;
+  top: 70px; /* Abaixo da navbar */
+  z-index: 999;
+  background: linear-gradient(to right, #f8f9fa, #ffffff, #f8f9fa);
+  border-bottom: 1px solid #dee2e6;
+  padding: 8px 0;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.abecedario-wrapper.sticky {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.abecedario-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.abecedario-scroll {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.abecedario-letra {
+  min-width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  background: white;
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.abecedario-letra:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+.abecedario-letra.ativa {
+  background: var(--primary-color);
+  color: white;
+  border-color: #145a32;
+  box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.3);
+}
+
+.abecedario-letra.vazio {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #e9ecef;
+}
+
+.abecedario-letra.clicado {
+  animation: clickPulse 0.3s ease;
+}
+
+@keyframes clickPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.abecedario-top {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  box-shadow: 0 2px 8px rgba(25, 135, 84, 0.4);
+  transition: all 0.2s;
+}
+
+.abecedario-top:hover {
+  background: #145a32;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 135, 84, 0.5);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .abecedario-wrapper {
+    top: 60px;
+    padding: 5px 0;
+  }
+
+  .abecedario-letra {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    padding: 0 6px;
+  }
+
+  .abecedario-top {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .abecedario-scroll {
+    gap: 2px;
+  }
+
+  .abecedario-letra {
+    min-width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+    padding: 0 4px;
+    border-radius: 6px;
+  }
+}
+
+/* Destaque ao navegar pelo abecedário */
+.clube-card.destaque-letra {
+  animation: destaqueLetra 2s ease;
+}
+
+@keyframes destaqueLetra {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 30px rgba(25, 135, 84, 0.4);
+  }
+}
+
+/* Background de Estádio no Card */
+.escudo-header.has-estadio {
+  position: relative;
+}
+
+.escudo-header.has-estadio::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  z-index: 1;
+}
+
+.escudo-header.has-estadio .escudo-container,
+.escudo-header.has-estadio .escudo-placeholder,
+.escudo-header.has-estadio .badge-estado {
+  position: relative;
+  z-index: 2;
+}
+
+/* Slideshow de estádio */
+.estadio-slideshow {
+  animation: estadioFade 15s infinite;
+}
+
+@keyframes estadioFade {
+  0%,
+  33% {
+    opacity: 1;
+  }
+  34%,
+  66% {
+    opacity: 0.8;
+  }
+  67%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsividade do abecedário */
+@media (max-width: 1200px) {
+  .abecedario-wrapper {
+    right: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .abecedario-wrapper {
+    display: none; /* Esconde em mobile */
+  }
+}
+
+/* Modal de Admin */
+.modal-lg {
+  max-width: 900px;
+}
+
+.estadio-upload-area {
+  transition: all 0.2s;
+}
+
+.estadio-upload-area:hover {
+  background-color: #f8f9fa;
+  border-color: var(--primary-color) !important;
+}
+
+#previewEstadios img {
+  border: 2px solid #dee2e6;
+  transition: transform 0.2s;
+}
+
+#previewEstadios img:hover {
+  transform: scale(1.05);
+}
+
+/* Botão de editar no card */
+.btn-editar-clube {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.clube-card:hover .btn-editar-clube {
+  opacity: 1;
+}
+
+/* Animação de loading para git */
+.git-loading {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--primary-color);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  z-index: 9999;
+  animation: pulse 1s infinite;
 }

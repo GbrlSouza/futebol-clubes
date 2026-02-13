@@ -3,7 +3,6 @@ class FutebolApp {
     const isGitHub = window.location.hostname.includes("github.io");
 
     this.BASE_PATH = isGitHub ? "/futebol-clubes" : "";
-
     this.JSON_URL = `${this.BASE_PATH}/data/clubes.json`;
     this.ESTADOS_URL = `${this.BASE_PATH}/data/estados.json`;
     this.IMAGES_PATH = `${this.BASE_PATH}/images/escudos/`;
@@ -20,17 +19,42 @@ class FutebolApp {
     try {
       await this.loadEstados();
       await this.loadData();
+
       this.setupBusca();
       this.renderAlfabetico();
       this.renderTimeline("asc");
       this.renderEstados();
+      this.setupAbecedario();
       this.switchView("alfabetico");
       this.hideLoading();
       this.setupImageErrorHandling();
+      this.setupAdmin();
     } catch (error) {
       this.showError("Erro ao inicializar aplicação: " + error.message);
       console.error("Stack:", error);
     }
+  }
+
+  setupAbecedario() {
+    const container = document.getElementById("abecedario-container");
+
+    if (!container) {
+      const nav = document.createElement("div");
+
+      nav.id = "abecedario-container";
+      nav.className = "abecedario-wrapper";
+      document.body.appendChild(nav);
+    }
+
+    abecedarioNav = new AbecedarioNav("abecedario-container");
+    abecedarioNav.updateAvailableLetters(this.clubes);
+  }
+
+  setupAdmin() {
+    adminModal = new AdminModal();
+    adminModal.addAdminButtons();
+
+    setTimeout(() => adminModal.addEditButtonsToCards(), 500);
   }
 
   async loadEstados() {
@@ -454,13 +478,39 @@ class FutebolApp {
     const anoAtual = new Date().getFullYear();
     const idade = anoAtual - clube.founded;
     const hasLyrics =
-      clube.anthem.lyrics_url && clube.anthem.lyrics_url !== "#";
+      clube.anthem?.lyrics_url && clube.anthem.lyrics_url !== "#";
     const hasSite = clube.site && clube.site !== "#";
 
+    let estadioStyle = "";
+    let estadioClass = "escudo-header";
+
+    if (clube.estadioImagens && clube.estadioImagens.length > 0) {
+      const imagens = clube.estadioImagens
+        .map((img) => `url('${this.BASE_PATH}/${img}')`)
+        .join(", ");
+      estadioStyle = `background-image: ${imagens}; background-size: cover; background-position: center;`;
+      estadioClass += " has-estadio";
+
+      if (clube.estadioImagens.length > 1) {
+        estadioClass += " estadio-slideshow";
+        clube.estadioImagens.forEach((_, i) => {
+          setTimeout(() => {
+            const card = document.querySelector(
+              `[data-slug="${clube.slug}"] .escudo-header`,
+            );
+            if (card) {
+              card.style.backgroundImage = `url('${this.BASE_PATH}/${clube.estadioImagens[i]}')`;
+            }
+          }, i * 5000);
+        });
+      }
+    }
+
     return `
-            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3" data-slug="${clube.slug}">
                 <div class="card clube-card h-100">
-                    <div class="card-img-top escudo-header">
+                    <div class="card-img-top ${estadioClass}" style="${estadioStyle}">
+                        <div class="estadio-overlay"></div>
                         ${this.renderEscudo(clube, "normal")}
                         <span class="badge bg-light text-dark badge-estado">
                             <i class="bi bi-geo-alt-fill me-1"></i>${clube.state}
