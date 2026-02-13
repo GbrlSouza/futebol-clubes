@@ -6,60 +6,97 @@ class AdminModal {
     this.isLocal =
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1";
-    this.API_URL = "http://localhost:3000/api";
+
+    this.JSON_PATH = "data/clubes.json";
+    this.clubes = [];
   }
 
   isAdminMode() {
     return this.isLocal;
   }
 
+  async loadClubes() {
+    try {
+      const response = await fetch(this.JSON_PATH + "?t=" + Date.now());
+      this.clubes = await response.json();
+      return this.clubes;
+    } catch (error) {
+      console.error("Erro ao carregar clubes:", error);
+      this.clubes = window.app?.clubes || [];
+      return this.clubes;
+    }
+  }
+
   addAdminButtons() {
-    if (!this.isAdminMode()) return;
+    if (!this.isAdminMode()) {
+      console.log("Modo admin desabilitado (não é localhost)");
+      return;
+    }
+
+    console.log("Modo admin ativado!");
 
     const navbar = document.querySelector(".navbar .container");
     const btnAdmin = document.createElement("button");
+
     btnAdmin.className = "btn btn-warning btn-sm ms-2";
     btnAdmin.innerHTML = '<i class="bi bi-gear-fill"></i> Admin';
     btnAdmin.onclick = () => this.openModal();
     navbar.appendChild(btnAdmin);
 
     document.addEventListener("click", (e) => {
-      if (e.target.closest(".btn-editar-clube")) {
-        const slug = e.target.closest(".btn-editar-clube").dataset.slug;
+      const btnEditar = e.target.closest(".btn-editar-clube");
+      if (btnEditar) {
+        const slug = btnEditar.dataset.slug;
         this.openModal(slug);
       }
     });
+
+    setTimeout(() => this.addEditButtonsToCards(), 1000);
   }
 
   addEditButtonsToCards() {
     if (!this.isAdminMode()) return;
 
     document.querySelectorAll(".clube-card").forEach((card) => {
-      const body = card.querySelector(".card-body");
-      const btnEditar = document.createElement("button");
-      btnEditar.className =
-        "btn btn-warning btn-sm btn-editar-clube position-absolute";
-      btnEditar.style.cssText = "top: 10px; left: 10px; z-index: 10;";
-      btnEditar.innerHTML = '<i class="bi bi-pencil-fill"></i>';
-      btnEditar.title = "Editar clube";
+      if (card.querySelector(".btn-editar-clube")) return;
 
       const titulo = card.querySelector(".card-title")?.textContent;
-      const clube = app.clubes.find((c) => c.full_name === titulo);
+      const clube =
+        this.clubes.find((c) => c.full_name === titulo) ||
+        window.app?.clubes?.find((c) => c.full_name === titito);
+
       if (clube) {
+        const btnEditar = document.createElement("button");
+        btnEditar.className =
+          "btn btn-warning btn-sm btn-editar-clube position-absolute";
+        btnEditar.style.cssText =
+          "top: 10px; left: 10px; z-index: 10; opacity: 0; transition: opacity 0.2s;";
+        btnEditar.innerHTML = '<i class="bi bi-pencil-fill"></i>';
+        btnEditar.title = "Editar clube";
         btnEditar.dataset.slug = clube.slug;
+
         card.style.position = "relative";
         card.appendChild(btnEditar);
+        card.addEventListener(
+          "mouseenter",
+          () => (btnEditar.style.opacity = "1"),
+        );
+        card.addEventListener(
+          "mouseleave",
+          () => (btnEditar.style.opacity = "0"),
+        );
       }
     });
   }
 
   async openModal(slug = null) {
-    this.clubeAtual = slug ? app.clubes.find((c) => c.slug === slug) : null;
+    await this.loadClubes();
+
+    this.clubeAtual = slug ? this.clubes.find((c) => c.slug === slug) : null;
     this.estadioImagens = this.clubeAtual?.estadioImagens || [];
 
     this.createModalElement();
     this.fillForm();
-    this.setupEventListeners();
 
     const modalEl = document.getElementById("adminModal");
     this.modal = new bootstrap.Modal(modalEl);
@@ -70,6 +107,41 @@ class AdminModal {
     const existing = document.getElementById("adminModal");
     if (existing) existing.remove();
 
+    const estadosOptions = window.app?.estadosNomes
+      ? Object.entries(window.app.estadosNomes)
+          .map(
+            ([sigla, nome]) =>
+              `<option value="${sigla}">${sigla} - ${nome}</option>`,
+          )
+          .join("")
+      : `<option value="AC">AC - Acre</option>
+               <option value="AL">AL - Alagoas</option>
+               <option value="AP">AP - Amapá</option>
+               <option value="AM">AM - Amazonas</option>
+               <option value="BA">BA - Bahia</option>
+               <option value="CE">CE - Ceará</option>
+               <option value="DF">DF - Distrito Federal</option>
+               <option value="ES">ES - Espírito Santo</option>
+               <option value="GO">GO - Goiás</option>
+               <option value="MA">MA - Maranhão</option>
+               <option value="MT">MT - Mato Grosso</option>
+               <option value="MS">MS - Mato Grosso do Sul</option>
+               <option value="MG">MG - Minas Gerais</option>
+               <option value="PA">PA - Pará</option>
+               <option value="PB">PB - Paraíba</option>
+               <option value="PR">PR - Paraná</option>
+               <option value="PE">PE - Pernambuco</option>
+               <option value="PI">PI - Piauí</option>
+               <option value="RJ">RJ - Rio de Janeiro</option>
+               <option value="RN">RN - Rio Grande do Norte</option>
+               <option value="RS">RS - Rio Grande do Sul</option>
+               <option value="RO">RO - Rondônia</option>
+               <option value="RR">RR - Roraima</option>
+               <option value="SC">SC - Santa Catarina</option>
+               <option value="SP">SP - São Paulo</option>
+               <option value="SE">SE - Sergipe</option>
+               <option value="TO">TO - Tocantins</option>`;
+
     const modalHTML = `
             <div class="modal fade" id="adminModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -79,10 +151,10 @@ class AdminModal {
                                 <i class="bi bi-${this.clubeAtual ? "pencil" : "plus-circle"} me-2"></i>
                                 ${this.clubeAtual ? "Editar" : "Novo"} Clube
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="formClube">
+                            <form id="formClube" onsubmit="event.preventDefault(); adminModal.salvar();">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Nome Curto *</label>
@@ -102,12 +174,7 @@ class AdminModal {
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Estado *</label>
                                         <select class="form-select" name="state" required>
-                                            ${Object.entries(app.estadosNomes)
-                                              .map(
-                                                ([sigla, nome]) =>
-                                                  `<option value="${sigla}">${sigla} - ${nome}</option>`,
-                                              )
-                                              .join("")}
+                                            ${estadosOptions}
                                         </select>
                                     </div>
                                     <div class="col-md-4 mb-3">
@@ -164,17 +231,12 @@ class AdminModal {
                                 <div class="mb-3">
                                     <label class="form-label">
                                         <i class="bi bi-images me-1"></i>
-                                        Fotos do Estádio (serão usadas como background no grid)
+                                        URLs das Fotos do Estádio (uma por linha)
                                     </label>
-                                    <div class="estadio-upload-area border rounded p-3 text-center" 
-                                         onclick="document.getElementById('inputEstadio').click()"
-                                         style="cursor: pointer; border-style: dashed !important;">
-                                        <i class="bi bi-cloud-upload fs-1 text-muted"></i>
-                                        <p class="mb-0 text-muted">Clique para adicionar fotos do estádio</p>
-                                        <small class="text-muted">Pode selecionar múltiplas imagens</small>
-                                    </div>
-                                    <input type="file" id="inputEstadio" class="d-none" 
-                                           accept="image/*" multiple onchange="adminModal.handleEstadioUpload(this)">
+                                    <textarea class="form-control" id="estadioUrls" rows="3" 
+                                              placeholder="https://exemplo.com/estadio1.jpg&#10;https://exemplo.com/estadio2.jpg"
+                                              onchange="adminModal.parseEstadioUrls(this.value)"></textarea>
+                                    <div class="form-text">Cole as URLs das imagens, uma por linha. Serão usadas como background no grid.</div>
                                     
                                     <div id="previewEstadios" class="row g-2 mt-2">
                                         <!-- Previews serão inseridos aqui -->
@@ -205,10 +267,24 @@ class AdminModal {
     document.body.insertAdjacentHTML("beforeend", modalHTML);
   }
 
+  parseEstadioUrls(urlsText) {
+    this.estadioImagens = urlsText
+      .split("\n")
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+    this.renderEstadioPreviews();
+  }
+
   fillForm() {
-    if (!this.clubeAtual) return;
+    if (!this.clubeAtual) {
+      document.getElementById("estadioUrls").value = "";
+      this.renderEstadioPreviews();
+      return;
+    }
 
     const form = document.getElementById("formClube");
+    if (!form) return;
+
     const c = this.clubeAtual;
 
     form.short_name.value = c.short_name || "";
@@ -223,37 +299,30 @@ class AdminModal {
     form.anthem_title.value = c.anthem?.title || "";
     form.anthem_lyrics_url.value = c.anthem?.lyrics_url || "";
 
+    this.estadioImagens = c.estadioImagens || [];
+    document.getElementById("estadioUrls").value =
+      this.estadioImagens.join("\n");
     this.renderEstadioPreviews();
-  }
-
-  handleEstadioUpload(input) {
-    const files = Array.from(input.files);
-    const previewContainer = document.getElementById("previewEstadios");
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.estadioImagens.push(e.target.result);
-        this.renderEstadioPreviews();
-      };
-      reader.readAsDataURL(file);
-    });
   }
 
   renderEstadioPreviews() {
     const container = document.getElementById("previewEstadios");
     if (!container) return;
 
+    if (this.estadioImagens.length === 0) {
+      container.innerHTML =
+        '<div class="col-12 text-muted small">Nenhuma imagem adicionada</div>';
+      return;
+    }
+
     container.innerHTML = this.estadioImagens
       .map(
-        (img, index) => `
+        (url, index) => `
             <div class="col-4 col-md-3">
                 <div class="position-relative">
-                    <img src="${img}" class="img-fluid rounded" style="height: 100px; object-fit: cover; width: 100%;">
-                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
-                            onclick="adminModal.removerEstadioImage(${index})">
-                        <i class="bi bi-x"></i>
-                    </button>
+                    <img src="${url}" class="img-fluid rounded" 
+                         style="height: 100px; object-fit: cover; width: 100%;"
+                         onerror="this.src='https://via.placeholder.com/150?text=Erro'">
                     ${index === 0 ? '<span class="badge bg-success position-absolute bottom-0 start-0 m-1">Principal</span>' : ""}
                 </div>
             </div>
@@ -262,20 +331,15 @@ class AdminModal {
       .join("");
   }
 
-  removerEstadioImage(index) {
-    this.estadioImagens.splice(index, 1);
-    this.renderEstadioPreviews();
-  }
-
   async salvar() {
     const form = document.getElementById("formClube");
-    if (!form.checkValidity()) {
-      form.reportValidity();
+    if (!form || !form.checkValidity()) {
+      form?.reportValidity();
       return;
     }
 
     const formData = new FormData(form);
-    const dados = {
+    const novoClube = {
       short_name: formData.get("short_name"),
       full_name: formData.get("full_name"),
       city: formData.get("city"),
@@ -286,6 +350,7 @@ class AdminModal {
       typeSlug: formData.get("typeSlug"),
       status: formData.get("status"),
       uniforme: formData.get("slug"),
+      wikipedia_page: formData.get("full_name"),
       anthem: {
         title:
           formData.get("anthem_title") ||
@@ -293,99 +358,62 @@ class AdminModal {
         lyrics_url: formData.get("anthem_lyrics_url") || null,
         audio_url: null,
       },
+      estadioImagens: this.estadioImagens.filter((url) => url.length > 0),
     };
 
-    const imagensExistentes = this.estadioImagens.filter(
-      (img) => !img.startsWith("data:"),
-    );
-    const novasImagens = this.estadioImagens.filter((img) =>
-      img.startsWith("data:"),
-    );
-
-    dados.estadioImagens = imagensExistentes;
-    if (novasImagens.length > 0) {
-      dados.novasEstadioImagens = novasImagens;
-    }
-
-    try {
-      const url = this.clubeAtual
-        ? `${this.API_URL}/clubes/${this.clubeAtual.slug}`
-        : `${this.API_URL}/clubes`;
-
-      const method = this.clubeAtual ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method: method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      const mensagemCommit = this.clubeAtual
-        ? `✏️ Atualiza ${dados.full_name}`
-        : `➕ Adiciona ${dados.full_name}`;
-
-      await this.gitCommit(mensagemCommit);
-
-      this.modal.hide();
-      alert("✅ Clube salvo e commit realizado com sucesso!");
-      location.reload();
-    } catch (error) {
-      alert("❌ Erro: " + error.message);
-      console.error(error);
-    }
-  }
-
-  async excluirClube() {
-    if (!confirm("Tem certeza que deseja excluir este clube?")) return;
-
-    try {
-      const response = await fetch(
-        `${this.API_URL}/clubes/${this.clubeAtual.slug}`,
-        {
-          method: "DELETE",
-        },
+    if (this.clubeAtual) {
+      const index = this.clubes.findIndex(
+        (c) => c.slug === this.clubeAtual.slug,
       );
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
+      if (index !== -1) {
+        this.clubes[index] = { ...this.clubes[index], ...novoClube };
       }
+    } else {
+      if (this.clubes.find((c) => c.slug === novoClube.slug)) {
+        alert("❌ Erro: Já existe um clube com este slug!");
+        return;
+      }
+      this.clubes.push(novoClube);
+    }
 
-      await this.gitCommit(`🗑️ Remove ${this.clubeAtual.full_name}`);
+    this.downloadJSON();
+    this.modal?.hide();
+    alert(
+      "✅ Clube salvo! O arquivo JSON foi baixado. Substitua o arquivo data/clubes.json e faça commit.",
+    );
+  }
 
-      this.modal.hide();
-      alert("✅ Clube excluído com sucesso!");
-      location.reload();
-    } catch (error) {
-      alert("❌ Erro: " + error.message);
+  excluirClube() {
+    if (!this.clubeAtual) return;
+
+    if (
+      !confirm(`Tem certeza que deseja excluir "${this.clubeAtual.full_name}"?`)
+    )
+      return;
+
+    const index = this.clubes.findIndex((c) => c.slug === this.clubeAtual.slug);
+    if (index !== -1) {
+      this.clubes.splice(index, 1);
+      this.downloadJSON();
+      this.modal?.hide();
+      alert(
+        "✅ Clube excluído! O arquivo JSON foi baixado. Substitua o arquivo data/clubes.json e faça commit.",
+      );
     }
   }
 
-  async gitCommit(mensagem) {
-    try {
-      const response = await fetch(`${this.API_URL}/git-commit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: mensagem }),
-      });
+  downloadJSON() {
+    const dataStr = JSON.stringify(this.clubes, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const link = document.createElement("a");
 
-      const result = await response.json();
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = "clubes.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-      if (!result.success) {
-        console.warn("Git commit falhou:", result.error);
-      } else {
-        console.log("✅ Git commit realizado:", mensagem);
-      }
-    } catch (error) {
-      console.warn("Erro no git commit:", error.message);
-    }
+    console.log("📥 JSON baixado:", this.clubes.length, "clubes");
   }
 }
 
